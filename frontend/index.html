@@ -1,1 +1,59 @@
-gffdggvvuuh
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI SaaS V5 Dashboard</title>
+</head>
+<body>
+
+<h2>AI Browser Assistant</h2>
+
+<textarea id="prompt" placeholder="Enter text or URL"></textarea>
+<button onclick="translate()">Translate</button>
+
+<br><br>
+<select id="lang"></select>
+
+<pre id="out"></pre>
+
+<script>
+// Language options by user type
+const userLangs = {
+  guest: ['English','Spanish'],
+  employee: ['English','Spanish','French','German'],
+  admin: ['English','Spanish','French','German','Chinese','Japanese']
+};
+
+// Detect user type automatically from URL: ?user=guest|employee|admin
+function getUserType() {
+  const params = new URLSearchParams(window.location.search);
+  const type = params.get('user');
+  return type && userLangs[type] ? type : 'guest';
+}
+
+const detectedType = getUserType();
+const langSelect = document.getElementById('lang');
+
+userLangs[detectedType].forEach(lang => {
+  const option = document.createElement('option');
+  option.value = lang;
+  option.innerText = lang;
+  langSelect.appendChild(option);
+});
+
+async function translate(){
+  const prompt = document.getElementById('prompt').value;
+  const lang = document.getElementById('lang').value;
+
+  const res = await fetch('/api/ai', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ prompt, targetLang: lang })
+  });
+
+  const data = await res.json();
+  document.getElementById('out').innerText = data.translation;
+}
+</script>
+
+</body>
+</html>
