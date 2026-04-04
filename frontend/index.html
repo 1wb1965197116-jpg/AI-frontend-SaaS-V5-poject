@@ -32,7 +32,6 @@ function getUserType() {
 
 const detectedType = getUserType();
 const langSelect = document.getElementById('lang');
-
 userLangs[detectedType].forEach(lang => {
   const option = document.createElement('option');
   option.value = lang;
@@ -40,11 +39,14 @@ userLangs[detectedType].forEach(lang => {
   langSelect.appendChild(option);
 });
 
+// Fetch backend automatically relative to Render domain
 async function translate(){
   const prompt = document.getElementById('prompt').value;
   const lang = document.getElementById('lang').value;
 
-  const res = await fetch('/api/ai', {
+  const backendURL = window.location.origin;
+
+  const res = await fetch(`${backendURL}/api/ai`, {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({ prompt, targetLang: lang })
