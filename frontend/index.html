@@ -1,97 +1,19 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>AI SaaS V5 Dashboard</title>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI SaaS Chat</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<h2>AI Browser Assistant</h2>
-
-<textarea id="prompt" placeholder="Enter text or URL" style="width:100%;height:120px;"></textarea>
-
-<br><br>
-
-<select id="lang"></select>
-
-<br><br>
-
-<button onclick="translate()">Translate</button>
-
-<br><br>
-
-<pre id="out"></pre>
-
-<script>
-// ------------------------------
-// Language options
-// ------------------------------
-const userLangs = {
-  guest: ['English', 'Spanish'],
-  employee: ['English', 'Spanish', 'French', 'German'],
-  admin: ['English', 'Spanish', 'French', 'German', 'Chinese', 'Japanese']
-};
-
-// ------------------------------
-// Detect user type
-// ------------------------------
-function getUserType() {
-  const params = new URLSearchParams(window.location.search);
-  const type = params.get('user');
-  return type && userLangs[type] ? type : 'guest';
-}
-
-// ------------------------------
-// Populate languages
-// ------------------------------
-const detectedType = getUserType();
-const langSelect = document.getElementById('lang');
-
-userLangs[detectedType].forEach(lang => {
-  const option = document.createElement('option');
-  option.value = lang;
-  option.innerText = lang;
-  langSelect.appendChild(option);
-});
-
-// ------------------------------
-// Backend URL (FIXED)
-// ------------------------------
-function getBackendURL() {
-  return "https://ai-saas-v5-project.onrender.com";
-}
-
-// ------------------------------
-// Translate function
-// ------------------------------
-async function translate() {
-  const prompt = document.getElementById('prompt').value;
-  const lang = document.getElementById('lang').value;
-  const backendURL = getBackendURL();
-
-  document.getElementById('out').innerText = "⏳ Translating...";
-
-  try {
-    const res = await fetch(`${backendURL}/api/ai`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, targetLang: lang })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.error || "Request failed");
-    }
-
-    document.getElementById('out').innerText = data.translation;
-
-  } catch (err) {
-    document.getElementById('out').innerText = "❌ Error: " + err.message;
-    console.error(err);
-  }
-}
-</script>
-
+  <div id="chat-container">
+    <div id="chat-box"></div>
+    <form id="chat-form">
+      <input type="text" id="user-input" placeholder="Type your message..." autocomplete="off" required>
+      <button type="submit">Send</button>
+    </form>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
