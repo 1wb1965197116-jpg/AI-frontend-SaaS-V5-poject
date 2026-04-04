@@ -1,25 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI SaaS V5 Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<h2>AI Browser Assistant</h2>
+
+<textarea id="prompt" placeholder="Enter text or URL" style="width:100%;height:120px;"></textarea>
+
+<br><br>
+
+<select id="lang"></select>
+
+<br><br>
+
+<button onclick="translate()">Translate</button>
+
+<br><br>
+
+<pre id="out"></pre>
+
 <script>
 // ------------------------------
-// Auto-detect backend URL
-// ------------------------------
-
-// If frontend and backend are on the same origin, use relative path.
-// Otherwise, fall back to the absolute backend URL.
-const defaultBackendURL = "https://ai-saas-v5-project.onrender.com";
-
-function getBackendURL() {
-  // If running on backend origin (same as backend host), use relative
-  const origin = window.location.origin;
-  if (origin.includes("ai-saas-v5-project.onrender.com")) {
-    return ""; // same origin
-  }
-  return defaultBackendURL; // separate frontend
-}
-
-const backendURL = getBackendURL();
-
-// ------------------------------
-// Language selection
+// Language options
 // ------------------------------
 const userLangs = {
   guest: ['English', 'Spanish'],
@@ -27,15 +32,21 @@ const userLangs = {
   admin: ['English', 'Spanish', 'French', 'German', 'Chinese', 'Japanese']
 };
 
-// Detect user type automatically from URL: ?user=guest|employee|admin
+// ------------------------------
+// Detect user type
+// ------------------------------
 function getUserType() {
   const params = new URLSearchParams(window.location.search);
   const type = params.get('user');
   return type && userLangs[type] ? type : 'guest';
 }
 
+// ------------------------------
+// Populate languages
+// ------------------------------
 const detectedType = getUserType();
 const langSelect = document.getElementById('lang');
+
 userLangs[detectedType].forEach(lang => {
   const option = document.createElement('option');
   option.value = lang;
@@ -44,25 +55,43 @@ userLangs[detectedType].forEach(lang => {
 });
 
 // ------------------------------
-// Translate button
+// Backend URL (FIXED)
+// ------------------------------
+function getBackendURL() {
+  return "https://ai-saas-v5-project.onrender.com";
+}
+
+// ------------------------------
+// Translate function
 // ------------------------------
 async function translate() {
   const prompt = document.getElementById('prompt').value;
   const lang = document.getElementById('lang').value;
+  const backendURL = getBackendURL();
+
+  document.getElementById('out').innerText = "⏳ Translating...";
 
   try {
     const res = await fetch(`${backendURL}/api/ai`, {
       method: 'POST',
-      headers: {'Content-Type':'application/json'},
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt, targetLang: lang })
     });
 
-    if (!res.ok) throw new Error(`Server error: ${res.status}`);
     const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Request failed");
+    }
+
     document.getElementById('out').innerText = data.translation;
+
   } catch (err) {
-    document.getElementById('out').innerText = `Error: ${err.message}`;
+    document.getElementById('out').innerText = "❌ Error: " + err.message;
     console.error(err);
   }
 }
 </script>
+
+</body>
+</html>
