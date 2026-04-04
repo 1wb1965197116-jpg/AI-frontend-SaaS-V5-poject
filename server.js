@@ -15,7 +15,12 @@ app.use(express.json());
 const frontendPath = path.join(__dirname, 'frontend');
 app.use('/dashboard', express.static(frontendPath));
 
-// Catch-all for frontend routing
+// Redirect root / to /dashboard
+app.get('/', (req, res) => {
+  res.redirect('/dashboard');
+});
+
+// Catch-all for frontend routing under /dashboard
 app.get('/dashboard/*', (req, res) => {
   res.sendFile(path.join(frontendPath, 'index.html'));
 });
@@ -59,5 +64,6 @@ app.post('/api/ai', async (req, res) => {
 // Health check
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
+// Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`✅ Running on port ${PORT}`));
