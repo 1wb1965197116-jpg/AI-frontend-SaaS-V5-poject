@@ -11,19 +11,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Serve frontend on /dashboard
-const frontendPath = path.join(__dirname, 'frontend');
-app.use('/dashboard', express.static(frontendPath));
-
-// Redirect root / → /dashboard
-app.get('/', (req, res) => res.redirect('/dashboard'));
-
-// Catch-all for frontend routes under /dashboard
-app.get('/dashboard/*', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'index.html'));
-});
-
-// OpenAI API route (GPT-4 + fallback)
+// ------------------------------
+// 1️⃣ API route
+// ------------------------------
 app.post('/api/ai', async (req, res) => {
   const { prompt, targetLang } = req.body;
   const apiKey = process.env.OPENAI_API_KEY;
@@ -33,7 +23,7 @@ app.post('/api/ai', async (req, res) => {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Content-Type':'application/json',
+        'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
@@ -59,9 +49,27 @@ app.post('/api/ai', async (req, res) => {
   }
 });
 
-// Health check
+// ------------------------------
+// 2️⃣ Serve frontend on /dashboard
+// ------------------------------
+const frontendPath = path.join(__dirname, 'frontend');
+app.use('/dashboard', express.static(frontendPath));
+app.get('/dashboard/*', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
+
+// ------------------------------
+// 3️⃣ Redirect root / → /dashboard
+// ------------------------------
+app.get('/', (req, res) => res.redirect('/dashboard'));
+
+// ------------------------------
+// 4️⃣ Health check
+// ------------------------------
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
-// Start server
+// ------------------------------
+// 5️⃣ Start server
+// ------------------------------
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`✅ Running on port ${PORT}`));
