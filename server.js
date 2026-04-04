@@ -15,17 +15,15 @@ app.use(express.json());
 const frontendPath = path.join(__dirname, 'frontend');
 app.use('/dashboard', express.static(frontendPath));
 
-// Redirect root / to /dashboard
-app.get('/', (req, res) => {
-  res.redirect('/dashboard');
-});
+// Redirect root / → /dashboard
+app.get('/', (req, res) => res.redirect('/dashboard'));
 
-// Catch-all for frontend routing under /dashboard
+// Catch-all for frontend routes under /dashboard
 app.get('/dashboard/*', (req, res) => {
   res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
-// OpenAI API route with GPT-4 + fallback
+// OpenAI API route (GPT-4 + fallback)
 app.post('/api/ai', async (req, res) => {
   const { prompt, targetLang } = req.body;
   const apiKey = process.env.OPENAI_API_KEY;
