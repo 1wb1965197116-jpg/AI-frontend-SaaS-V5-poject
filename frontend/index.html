@@ -1,22 +1,26 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>AI SaaS V5 Dashboard</title>
-</head>
-<body>
-
-<h2>AI Browser Assistant</h2>
-
-<textarea id="prompt" placeholder="Enter text or URL"></textarea>
-<button onclick="translate()">Translate</button>
-
-<br><br>
-<select id="lang"></select>
-
-<pre id="out"></pre>
-
 <script>
-// Language options by user type
+// ------------------------------
+// Auto-detect backend URL
+// ------------------------------
+
+// If frontend and backend are on the same origin, use relative path.
+// Otherwise, fall back to the absolute backend URL.
+const defaultBackendURL = "https://ai-saas-v5-project.onrender.com";
+
+function getBackendURL() {
+  // If running on backend origin (same as backend host), use relative
+  const origin = window.location.origin;
+  if (origin.includes("ai-saas-v5-project.onrender.com")) {
+    return ""; // same origin
+  }
+  return defaultBackendURL; // separate frontend
+}
+
+const backendURL = getBackendURL();
+
+// ------------------------------
+// Language selection
+// ------------------------------
 const userLangs = {
   guest: ['English', 'Spanish'],
   employee: ['English', 'Spanish', 'French', 'German'],
@@ -39,23 +43,26 @@ userLangs[detectedType].forEach(lang => {
   langSelect.appendChild(option);
 });
 
-// Fetch backend automatically relative to Render domain
-async function translate(){
+// ------------------------------
+// Translate button
+// ------------------------------
+async function translate() {
   const prompt = document.getElementById('prompt').value;
   const lang = document.getElementById('lang').value;
 
-  const backendURL = window.location.origin;
+  try {
+    const res = await fetch(`${backendURL}/api/ai`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ prompt, targetLang: lang })
+    });
 
-  const res = await fetch(`${backendURL}/api/ai`, {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ prompt, targetLang: lang })
-  });
-
-  const data = await res.json();
-  document.getElementById('out').innerText = data.translation;
+    if (!res.ok) throw new Error(`Server error: ${res.status}`);
+    const data = await res.json();
+    document.getElementById('out').innerText = data.translation;
+  } catch (err) {
+    document.getElementById('out').innerText = `Error: ${err.message}`;
+    console.error(err);
+  }
 }
 </script>
-
-</body>
-</html>
