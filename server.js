@@ -8,6 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.use(express.json({ limit: "64kb" }));
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST'],
@@ -18,7 +19,8 @@ app.use(cors({
 // 1️⃣ API route
 // ------------------------------
 app.post('/api/ai', async (req, res) => {
-  const { prompt, targetLang } = req.body;
+  const { prompt, targetLang } = req.body || {};
+  if (typeof prompt !== "string" || !prompt.trim() || typeof targetLang !== "string" || !targetLang.trim()) return res.status(400).json({ error: "prompt and targetLang are required" });
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'OpenAI API key not set' });
 
